@@ -1,0 +1,25 @@
+#dict-builder-btn {
+    position: absolute !important;
+    background-color: #FF7B00 !important; /* Запасний суцільний колір */
+    background-image: linear-gradient(135deg, #FF7B00, #FFC300) !important; /* Градієнт вашої палітри */
+    color: white !important;
+    padding: 6px 12px !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    font-weight: bold !important;
+    z-index: 2147483647 !important;
+    box-shadow: 0 4px 6px -1px rgba(255, 123, 0, 0.4), 0 2px 4px -1px rgba(255, 123, 0, 0.2) !important;
+    user-select: none !important;
+    font-family: sans-serif !important;
+    border: none !important;
+    transition: all 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#dict-builder-btn:hover {
+    background: linear-gradient(135deg, #FF8800, #FFD000) !important;
+    transform: scale(1.05) !important;
+}

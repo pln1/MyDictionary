@@ -1,0 +1,23 @@
+body { width: 300px; padding: 16px; font-family: sans-serif; margin: 0; color: #333; }
+h3 { text-align: center; color: #FF7B00; margin-top: 0; }
+.hidden { display: none !important; }
+
+input, select { 
+    width: 100%; box-sizing: border-box; margin-bottom: 12px; 
+    padding: 8px; border: 1px solid #ccc; border-radius: 6px; 
+}
+
+button { 
+    width: 100%; background: linear-gradient(135deg, #FF7B00, #FFC300); 
+    color: white; border: none; padding: 10px; border-radius: 8px; 
+    font-weight: bold; cursor: pointer; transition: all 0.2s; margin-bottom: 8px; 
+}
+
+button:hover { transform: scale(1.02); }
+button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+.logout-btn { background: #777; }
+.logout-btn:hover { background: #555; }
+
+.msg { font-size: 12px; text-align: center; display: none; margin-top: 0; }
+.error { color: red; }
+.success { color: green; }

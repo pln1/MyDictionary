@@ -1,0 +1,15 @@
+# Cache files
+__pycache__/
+*.pyc
+
+# Virtual env files
+venv/
+env/
+.venv/
+
+# DB files
+postgres_data/
+mongo_data/
+
+# env files
+.env

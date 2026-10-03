@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "MyDictionary",
+  "version": "0.0",
+  "description": "Translate highlighted text and expand your vocabluary.",
+  "permissions": [
+    "scripting",
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["script.js"],
+      "css": ["styles.css"]
+    }
+  ]
+}
