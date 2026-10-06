@@ -9,44 +9,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const sourceLangSelect = document.getElementById('source-lang');
     const targetLangSelect = document.getElementById('target-lang');
 
-    // Загрузка сохраненных настроек
     chrome.storage.local.get(['jwt_token', 'source_lang', 'target_lang'], (result) => {
         if (result.jwt_token) {
-            showSettings(result.source_lang || 'en', result.target_lang || 'ru');
+            showSettings(result.source_lang || 'en', result.target_lang || 'uk');
         }
     });
 
-    // Функция проверки языков на совпадение
     function validateLanguages() {
         if (sourceLangSelect.value === targetLangSelect.value) {
-            // Если языки одинаковые
             if (langErrorMsg) langErrorMsg.style.display = 'block';
             
-            saveBtn.disabled = true; // Отключаем функционал клика
-            saveBtn.style.background = '#ccc'; // Делаем кнопку серой
-            saveBtn.style.cursor = 'not-allowed'; // Меняем курсор
+            saveBtn.disabled = true;
+            saveBtn.style.background = '#ccc';
+            saveBtn.style.cursor = 'not-allowed';
             saveBtn.style.transform = 'none';
         } else {
-            // Если языки разные
             if (langErrorMsg) langErrorMsg.style.display = 'none';
             
-            saveBtn.disabled = false; // Включаем клик
-            saveBtn.style.background = 'linear-gradient(135deg, #FF7B00, #FFC300)'; // Возвращаем градиент
+            saveBtn.disabled = false;
+            saveBtn.style.background = 'linear-gradient(135deg, #FF7B00, #FFC300)';
             saveBtn.style.cursor = 'pointer';
         }
     }
 
-    // Слушаем изменения в обоих списках
     sourceLangSelect.addEventListener('change', validateLanguages);
     targetLangSelect.addEventListener('change', validateLanguages);
 
     document.getElementById('login-btn').addEventListener('click', async () => {
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
         errorMsg.style.display = 'none';
 
+        if (!username || !password) {
+            errorMsg.textContent = 'Enter username and password';
+            errorMsg.style.display = 'block';
+            return;
+        }
+
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/token/', {
+            const response = await fetch('http://127.0.0.1:8000/api/auth/token/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
@@ -54,10 +55,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 const data = await response.json();
-                chrome.storage.local.set({ 'jwt_token': data.access }, () => {
-                    showSettings('en', 'ru');
+
+                chrome.storage.local.get(['source_lang', 'target_lang'], (stored) => {
+                const sLang = stored.source_lang || 'en';
+                const tLang = stored.target_lang || 'uk';
+
+                chrome.storage.local.set({ 
+                    'jwt_token': data.access,
+                    'refresh_token': data.refresh,
+                    'source_lang': sLang,
+                    'target_lang': tLang
+                    }, () => {
+                    showSettings(sLang, tLang);
+                    });
                 });
             } else {
+                errorMsg.textContent = 'Login failed. Check credentials.';
                 errorMsg.style.display = 'block';
             }
         } catch (error) {
@@ -77,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('logout-btn').addEventListener('click', () => {
-        chrome.storage.local.remove('jwt_token', () => {
+        chrome.storage.local.remove(['jwt_token', 'refresh_token'], () => {
             loginSection.classList.remove('hidden');
             settingsSection.classList.add('hidden');
             document.getElementById('username').value = '';
@@ -90,6 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
         settingsSection.classList.remove('hidden');
         sourceLangSelect.value = source;
         targetLangSelect.value = target;
-        validateLanguages(); // Проверяем сразу при отрисовке
+        validateLanguages();
     }
 });
