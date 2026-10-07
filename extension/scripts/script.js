@@ -49,15 +49,21 @@ async function handleTranslateWorkflow(rect, originalText) {
     DictUI.createCard(rect, originalText, sourceLang, targetLang, async (saveBtn) => {
         saveBtn.disabled = true;
         saveBtn.textContent = 'Saving...';
-
         try {
-            await DictAPI.saveUnit(originalText, currentTranslation, sourceLang, targetLang, token);
+            await DictAPI.saveUnit(originalText, currentTranslation, sourceLang, targetLang);
             saveBtn.textContent = 'Saved';
             saveBtn.style.background = '#28a745';
             setTimeout(() => DictUI.removeCard(), CONFIG.TIMERS.SUCCESS_CLOSE_MS);
         } catch (error) {
-            saveBtn.textContent = 'Save failed';
-            saveBtn.style.background = '#dc3545';
+            if (error.status === 409) {
+                saveBtn.textContent = 'Already saved';
+                saveBtn.style.background = '#6c757d';
+                setTimeout(() => DictUI.removeCard(), CONFIG.TIMERS.SUCCESS_CLOSE_MS);
+            } else {
+                saveBtn.textContent = 'Save failed';
+                saveBtn.style.background = '#dc3545';
+                saveBtn.disabled = false;
+            }
         }
     });
 
@@ -68,7 +74,7 @@ async function handleTranslateWorkflow(rect, originalText) {
     }
 
     try {
-        const result = await DictAPI.translate(originalText, sourceLang, targetLang, token);
+        const result = await DictAPI.translate(originalText, sourceLang, targetLang);
         currentTranslation = result.translation || originalText;
         DictUI.setTranslatedText(currentTranslation);
     } catch (error) {

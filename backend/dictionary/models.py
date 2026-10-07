@@ -22,6 +22,7 @@ class Topic(models.Model):
 
     class Meta:
         ordering = ["position", "-created_at"]
+        unique_together = ("user", "name")
 
     def __str__(self):
         return self.name
@@ -29,8 +30,7 @@ class Topic(models.Model):
 
 class Unit(models.Model):
     class State(models.TextChoices):
-        NEW = "new", "New"
-        LEARNING = "learning", "In Progress"
+        LEARNING = "learning", "Learning"
         LEARNED = "learned", "Learned"
 
     user = models.ForeignKey(
@@ -40,7 +40,9 @@ class Unit(models.Model):
     translation = models.TextField()
     source_lang = models.CharField(max_length=2, default="en")
     target_lang = models.CharField(max_length=2, default="uk")
-    state = models.CharField(max_length=10, choices=State.choices, default=State.NEW)
+    state = models.CharField(
+        max_length=10, choices=State.choices, default=State.LEARNING
+    )
 
     topics = models.ManyToManyField(
         Topic, through="TopicUnit", related_name="units", blank=True
@@ -49,12 +51,19 @@ class Unit(models.Model):
     added_date = models.DateTimeField(auto_now_add=True)
     learned_date = models.DateTimeField(null=True, blank=True)
 
+    class Meta:
+        unique_together = ("user", "text")
+
+    def __str__(self):
+        return self.text
+
 
 class TopicUnit(models.Model):
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
     position = models.PositiveIntegerField(default=0)
+    added_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        ordering = ["position", "-added_at"]
         unique_together = ("topic", "unit")
-        ordering = ["position"]

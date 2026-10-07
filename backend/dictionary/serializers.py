@@ -1,9 +1,16 @@
 from rest_framework import serializers
-from .models import Topic, Unit
+from .models import Topic, Unit, TopicUnit
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 
 User = get_user_model()
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "username", "source_lang", "target_lang"]
+        read_only_fields = ["id", "username"]
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -33,6 +40,13 @@ class RegisterSerializer(serializers.ModelSerializer):
 class TopicSerializer(serializers.ModelSerializer):
     units_count = serializers.IntegerField(source="units.count", read_only=True)
 
+    def validate_name(self, value):
+        if value.strip().lower() == "saved":
+            raise serializers.ValidationError(
+                "Topic name 'Saved' is reserved for system use."
+            )
+        return value
+
     class Meta:
         model = Topic
         fields = ["id", "name", "position", "units_count", "created_at"]
@@ -57,11 +71,25 @@ class UnitSerializer(serializers.ModelSerializer):
             "added_date",
             "learned_date",
         ]
-        read_only_fields = ["id", "added_date"]
+        read_only_fields = ["id", "user", "added_date", "learned_date"]
 
     def validate_topic_ids(self, topics):
         user = self.context["request"].user
         for topic in topics:
             if topic.user != user:
-                raise serializers.ValidationError(f"Topic '{topic.name}' is noy yours.")
+                raise serializers.ValidationError(f"Topic '{topic.name}' is not yours.")
         return topics
+
+    def create(self, validated_data):
+        topics = validated_data.pop("topics", [])
+
+        user = validated_data.pop("user", None)
+        if not user and "request" in self.context:
+            user = self.context["request"].user
+
+        unit = Unit.objects.create(user=user, **validated_data)
+
+        for topic in topics:
+            TopicUnit.objects.create(unit=unit, topic=topic)
+
+        return unit

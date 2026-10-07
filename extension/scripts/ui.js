@@ -46,7 +46,6 @@ const DictUI = {
         card.style.top = `${rect.bottom + window.scrollY + CONFIG.UI.POPUP_CARD_OFFSET_TOP}px`;
         card.style.left = `${Math.max(CONFIG.UI.MIN_SCREEN_LEFT_MARGIN, rect.left + window.scrollX - CONFIG.UI.POPUP_CARD_OFFSET_LEFT)}px`;
 
-        // Header: Languages + Close button
         const header = document.createElement('div');
         header.className = 'dict-card-header';
 
@@ -66,7 +65,6 @@ const DictUI = {
         header.appendChild(langsSpan);
         header.appendChild(closeBtn);
 
-        // Body: 2 columns (Original | Translation)
         const body = document.createElement('div');
         body.className = 'dict-card-body';
 
@@ -96,7 +94,6 @@ const DictUI = {
         body.appendChild(colOriginal);
         body.appendChild(colTranslated);
 
-        // Save Button
         const saveBtn = document.createElement('button');
         saveBtn.className = 'dict-card-save-btn';
         saveBtn.id = 'dict-save-btn';
@@ -119,14 +116,26 @@ const DictUI = {
         }, CONFIG.TIMERS.AUTO_CLOSE_MS);
     },
 
-    setTranslatedText(text) {
+    setTranslatedText(text, isSaved = false) {
         const transElem = document.getElementById('dict-trans-text');
         const saveBtn = document.getElementById('dict-save-btn');
         if (transElem) {
             transElem.style.color = '';
             transElem.textContent = text;
         }
-        if (saveBtn) saveBtn.disabled = false;
+        if (saveBtn) {
+            if (isSaved) {
+                saveBtn.textContent = 'Already in Saved';
+                saveBtn.disabled = true;
+                saveBtn.style.background = '#6c757d';
+                saveBtn.style.cursor = 'default';
+            } else {
+                saveBtn.textContent = 'Save';
+                saveBtn.disabled = false;
+                saveBtn.style.background = '';
+                saveBtn.style.cursor = 'pointer';
+            }
+        }
     },
 
     showWarning(message) {

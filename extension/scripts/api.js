@@ -88,7 +88,11 @@ const DictAPI = {
                 target_lang: targetLang
             })
         });
-
+        if (response.status === 409) {
+            const err = new Error('Already saved');
+            err.status = 409;
+            throw err;
+        }
         if (!response.ok) {
             throw new Error(`Save error: ${response.status}`);
         }
